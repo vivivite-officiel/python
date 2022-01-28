@@ -1,0 +1,36 @@
+### models.py
+from django.db import models
+
+class Page_Manager(models.Manager):
+    
+    def compteur_manager(self, request):
+        return super(Page_Manager, self).get_queryset().filter(date=date.today(), url=request.build_absolute_uri(request.path)).update(compteur=F('compteur') + 1 )
+        
+class Page_Model(models.Model):
+    ...
+    url = models.CharField(null=True, blank=True,max_length=600, default="0")
+    date = models.DateTimeField(auto_now_add=True, null=True, blank=True, editable=True)
+    compteur = models.IntegerField(null=True, blank=True, default="0")
+    
+    obj = Page_Manager()
+
+    def __str__(self):
+        return f'{self.compteur}'
+
+    class Meta:
+        verbose_name = 'Compteur de page'
+    
+    
+### views.py ou context_processor.py
+from page.models import Page_Model
+from datetime import date
+from django.db.models import F
+
+
+def page(request):
+  zz = Page.obj.filter(date=date.today(), url=request.build_absolute_uri(request.path))
+  zz.update(compteur=F('compteur') + 1 )
+  
+  ... ou
+  
+  Page.obj.compteur_manager(request)
